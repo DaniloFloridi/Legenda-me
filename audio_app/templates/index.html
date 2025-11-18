@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Transcriber</title>
+    <style>
+        #record-btn {
+            padding: 15px;
+            background: #444;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #recording-indicator {
+            width: 20px;
+            height: 20px;
+            background: red;
+            border-radius: 50%;
+            margin-top: 10px;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        #recording-indicator.active {
+            opacity: 1;
+            box-shadow: 0 0 10px red;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 Audio Transcriber</h1>
+
+    <button id="record-btn">Start Recording</button>
+    <div id="recording-indicator"></div>
+
+    <h2>Transcript:</h2>
+    <pre id="transcript"></pre>
+
+    <h2>Translation:</h2>
+    <pre id="translation"></pre>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        const btn = document.getElementById("record-btn");
+        const indicator = document.getElementById("recording-indicator");
+
+        btn.addEventListener("click", async () => {
+            if (!isRecording) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+
+                mediaRecorder.onstop = sendAudio;
+
+                audioChunks = [];
+                mediaRecorder.start();
+
+                isRecording = true;
+                btn.textContent = "Stop Recording";
+                indicator.classList.add("active");
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.textContent = "Start Recording";
+                indicator.classList.remove("active");
+            }
+        });
+
+        function sendAudio() {
+            const blob = new Blob(audioChunks, { type: "audio/wav" });
+            const formData = new FormData();
+            formData.append("audio", blob, "audio.wav");
+
+            fetch("/api/transcribe/", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("transcript").textContent = data.transcript || "(no transcript)";
+                document.getElementById("translation").textContent = data.translation || "(no translation)";
+            })
+            .catch(err => console.error("Error:", err));
+        }
+    </script>
+</body>
+</html>
