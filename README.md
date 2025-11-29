@@ -55,10 +55,22 @@ Este guia pressupõe que você tenha o Python e o pip instalados em seu sistema.
 
 1. Clonar o Repositório
 
+```bash
 git clone [https://github.com/DaniloFloridi/Legenda-me]
+cd transcricao_web-main
+```
 
+2. Configurar o Ambiente Virtual
 
-2. Instalar Dependências
+É altamente recomendável usar um ambiente virtual para isolar as dependências:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # No Linux/macOS
+# venv\Scripts\activate   # No Windows
+```
+
+3. Instalar Dependências
 
 As principais bibliotecas necessárias para o projeto são:
 
@@ -66,24 +78,23 @@ As principais bibliotecas necessárias para o projeto são:
 pip install django faster-whisper transformers torch
 
 
-3. Configuração dos Modelos de IA:
+4. Configuração dos Modelos de IA:
 
 O projeto utiliza modelos de IA que precisam ser carregados localmente.
 
-A. Modelo Faster-Whisper
+#### 4.1. Modelo Faster-Whisper
 
 O modelo medium será baixado automaticamente na primeira execução.
 
-B. Modelo MarianMT para Tradução
+#### 4.2. Modelo MarianMT para Tradução
 
 O código-fonte (audio_app/views.py) espera o modelo de tradução Inglês para Português (opus-mt-en-pt) em um caminho específico.
 
-Atenção: O caminho no código (r"E:\Projeto Atualizado - Django Trial\models\opus-mt-en-pt") é um caminho local do desenvolvedor e precisa ser ajustado.
+**Atenção:** O caminho no código (r"E:\Projeto Atualizado - Django Trial\models\opus-mt-en-pt") é um caminho local do desenvolvedor e **precisa ser ajustado**.
 
-1.
-Baixe o modelo: O modelo pode ser baixado e carregado automaticamente pelo Hugging Face, mas para garantir o funcionamento local, você pode usar o código abaixo para baixá-lo e salvar em um diretório:
+a. Baixe o modelo: O modelo pode ser baixado e carregado automaticamente pelo Hugging Face, mas para garantir o funcionamento local, você pode usar o código abaixo para baixá-lo e salvar em um diretório:
 
-
+```python
 from transformers import MarianMTModel, MarianTokenizer
 
 model_name = "Helsinki-NLP/opus-mt-en-pt"
@@ -94,16 +105,15 @@ model = MarianMTModel.from_pretrained(model_name)
 save_directory = "./models/opus-mt-en-pt" 
 tokenizer.save_pretrained(save_directory)
 model.save_pretrained(save_directory)
+```
 
+b. Atualize o caminho no views.py: Edite o arquivo audio_app/views.py (linha 15) para apontar para o diretório onde você salvou o modelo:
 
-2.
-Atualize o caminho no views.py: Edite o arquivo audio_app/views.py (linha 15) para apontar para o diretório onde você salvou o modelo:
-
-
+```python
 marian_model_name = "./models/opus-mt-en-pt" # Ou o caminho que você escolheu
+```
 
-
-4. Executar o Servidor Django
+5. Executar o Servidor Django
 
 Com as dependências instaladas e o caminho do modelo ajustado, você pode iniciar o servidor de desenvolvimento:
 
@@ -117,14 +127,11 @@ Arquitetura do Sistema:
 
 O sistema segue o padrão Model-View-Template (MVT) do Django e é dividido em três módulos principais:
 
-1.
-Frontend (Navegador): Responsável pela interface e pela captura de áudio. O JavaScript utiliza a Web Audio API para gravar o áudio do microfone e enviá-lo em chunks via requisição POST para o backend.
+1. Frontend (Navegador): Responsável pela interface e pela captura de áudio. O JavaScript utiliza a Web Audio API para gravar o áudio do microfone e enviá-lo em *chunks* via requisição `POST` para o backend.
 
-2.
-Backend (Django): Recebe o áudio, gerencia o fluxo de processamento e coordena os módulos de IA.
+2. Backend (Django): Recebe o áudio, gerencia o fluxo de processamento e coordena os módulos de IA.
 
-3.
-Módulos de IA (Local):
+3. Módulos de IA (Local):
 
 Transcrição: O áudio é processado pelo Faster-Whisper (modelo definido pelo usuário), que o converte em texto (transcrição).
 
