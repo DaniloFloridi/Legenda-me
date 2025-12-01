@@ -1,55 +1,201 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #121212;
-    color: #e0e0e0;
+    font-family: Verdana, Geneva, sans-serif;
+    background: #f4f4f9; /* Fundo */
+    color: #333333; 
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
+    padding: 20px;
 }
 
 .container {
-    background: #1e1e1e;
-    padding: 30px;
+    background: #ffffff; /* Fundo principal branco */
+    padding: 40px;
     border-radius: 12px;
     width: 100%;
-    max-width: 600px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    max-width: 750px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
 h1 {
     text-align: center;
-    color: #f39c12;
+    color: #007bff; 
+    font-size: 2.2em;
+    margin-bottom: 10px;
 }
 
-button {
-    padding: 10px 20px;
-    background: #f39c12;
-    border: none;
-    border-radius: 6px;
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Botão Engrenagem - Modal */
+#settings-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
     cursor: pointer;
-    color: #121212;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+#settings-modal.modal-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.accessibility-controls {
+    background: #f0f0f5;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.accessibility-controls h2 {
+    color: #007bff;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #007bff;
+    padding-bottom: 5px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.control-group label {
     font-weight: bold;
+    color: #333333;
+    flex-basis: 150px;
+}
+
+.control-group input[type="range"],
+.control-group select {
+    flex-grow: 1;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+}
+
+#font-size-value {
+    font-weight: bold;
+    color: #007bff;
+    min-width: 40px;
+    text-align: right;
+}
+
+#close-settings-btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
     margin-top: 10px;
 }
 
-button:hover {
-    background: #e67e22;
+#record-btn {
+    padding: 12px 25px;
+    background: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.05em;
+    transition: background 0.3s;
 }
 
-.status, .result {
-    margin-top: 20px;
-    background: #2c2c2c;
-    padding: 15px;
-    border-radius: 8px;
+#record-btn:hover {
+    background: #0056b3;
+}
+
+#recording-indicator {
+    width: 20px;
+    height: 20px;
+    background: #dc3545;
+    border-radius: 50%;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+#recording-indicator.active {
+    opacity: 1;
+    box-shadow: 0 0 10px #dc3545;
+}
+
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.result-box {
+    background: #e9e9ee;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 3px solid #007bff;
 }
 
 h2 {
-    margin-bottom: 5px;
-    color: #f1c40f;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #007bff;
+    font-size: 1.2em;
+    border-bottom: 1px solid #cccccc;
+    padding-bottom: 5px;
 }
 
-p {
+pre {
+    white-space: pre-wrap;
     word-break: break-word;
+    font-size: 1em; 
+    line-height: 1.5;
+    color: #333333; 
+    margin: 0;
+    transition: all 0.3s ease;
 }
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+}
+

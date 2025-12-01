@@ -12,7 +12,7 @@ import torch
 
 whisper = WhisperModel("medium", device="cpu", compute_type="int8")
 
-marian_model_name = r"E:\Projeto Atualizado - Django Trial\models\opus-mt-en-pt"
+marian_model_name = r"E:\Legenda-me\models\opus-mt-en-pt"
 tokenizer = MarianTokenizer.from_pretrained(marian_model_name)
 model = MarianMTModel.from_pretrained(marian_model_name)
 

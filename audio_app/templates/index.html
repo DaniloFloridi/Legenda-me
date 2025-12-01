@@ -2,42 +2,160 @@
 <html>
 <head>
     <title>Audio Transcriber</title>
-    <style>
-        #record-btn {
-            padding: 15px;
-            background: #444;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        #recording-indicator {
-            width: 20px;
-            height: 20px;
-            background: red;
-            border-radius: 50%;
-            margin-top: 10px;
-            opacity: 0;
-            transition: 0.3s;
-        }
-        #recording-indicator.active {
-            opacity: 1;
-            box-shadow: 0 0 10px red;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/audio_app/style.css">
 </head>
 <body>
-    <h1>🎤 Audio Transcriber</h1>
+    <button id="settings-btn">⚙️</button>
 
-    <button id="record-btn">Start Recording</button>
-    <div id="recording-indicator"></div>
+    <div id="settings-modal" class="modal-hidden">
+        <div class="accessibility-controls">
+            <h2>⚙️ Configurações de Acessibilidade</h2>
+            <div class="control-group">
+                <label for="font-size">Tamanho da Fonte:</label>
+                <input type="range" id="font-size" min="1.0" max="2.0" step="0.1" value="1.0">
+                <span id="font-size-value">1.0x</span>
+            </div>
 
-    <h2>Transcript:</h2>
-    <pre id="transcript"></pre>
+            <div class="control-group">
+                <label for="font-family">Tipo de Fonte:</label>
+                <select id="font-family">
+                    <option value="Verdana, Geneva, sans-serif">Padrão (Verdana)</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Courier New', monospace">Monospace</option>
+                    <option value="'Open Sans', sans-serif">Open Sans (Simples)</option>
+                </select>
+            </div>
 
-    <h2>Translation:</h2>
-    <pre id="translation"></pre>
+            <div class="control-group">
+                <label for="text-color">Cor do Texto:</label>
+                <select id="text-color">
+                    <option value="#333333">Preto (Padrão)</option>
+                    <option value="#ffffff">Branco</option>
+                    <option value="#ffff00">Amarelo</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="bg-color">Cor de Fundo:</label>
+                <select id="bg-color">
+                    <option value="transparent">Transparente (Padrão)</option>
+                    <option value="#000000">Preto</option>
+                    <option value="#ffffff">Branco</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="text-align">Alinhamento do Texto:</label>
+                <select id="text-align">
+                    <option value="left">Esquerda (Padrão)</option>
+                    <option value="center">Centro</option>
+                    <option value="right">Direita</option>
+                </select>
+            </div>
+            <button id="close-settings-btn">Fechar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>🎤 Audio Transcriber</h1>
+
+        <div class="controls">
+            <button id="record-btn">Iniciar Gravação</button>
+            <div id="recording-indicator"></div>
+        </div>
+
+        <div class="results">
+            <div class="result-box">
+                <h2>Transcrição:</h2>
+                <pre id="transcript">(O texto transcrito aparecerá aqui)</pre>
+            </div>
+
+            <div class="result-box">
+                <h2>Tradução:</h2>
+                <pre id="translation">(A tradução aparecerá aqui)</pre>
+            </div>
+        </div>
+    </div>
 
     <script>
+        //Lógica do Modal de Configurações
+        const settingsBtn = document.getElementById("settings-btn");
+        const settingsModal = document.getElementById("settings-modal");
+        const closeSettingsBtn = document.getElementById("close-settings-btn");
+
+        settingsBtn.addEventListener("click", () => {
+            settingsModal.classList.toggle("modal-hidden");
+        });
+
+        closeSettingsBtn.addEventListener("click", () => {
+            settingsModal.classList.add("modal-hidden");
+        });
+
+        // Variáveis de Acessibilidade
+        const transcriptElement = document.getElementById("transcript");
+        const translationElement = document.getElementById("translation");
+        const fontSizeControl = document.getElementById("font-size");
+        const fontSizeValue = document.getElementById("font-size-value");
+        const fontFamilyControl = document.getElementById("font-family");
+        const textColorControl = document.getElementById("text-color");
+        const bgColorControl = document.getElementById("bg-color");
+        const textAlignControl = document.getElementById("text-align");
+
+        const defaultSettings = {
+            fontSize: '1.0',
+            fontFamily: 'Verdana, Geneva, sans-serif',
+            textColor: '#333333',
+            bgColor: 'transparent',
+            textAlign: 'left'
+        };
+
+        function saveSettings() {
+            const settings = {
+                fontSize: fontSizeControl.value,
+                fontFamily: fontFamilyControl.value,
+                textColor: textColorControl.value,
+                bgColor: bgColorControl.value,
+                textAlign: textAlignControl.value
+            };
+            localStorage.setItem('accessibilitySettings', JSON.stringify(settings));
+            applySettings(settings);
+        }
+
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('accessibilitySettings');
+            const settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+
+            fontSizeControl.value = settings.fontSize;
+            fontFamilyControl.value = settings.fontFamily;
+            textColorControl.value = settings.textColor;
+            bgColorControl.value = settings.bgColor;
+            textAlignControl.value = settings.textAlign;
+
+            applySettings(settings);
+        }
+
+        function applySettings(settings) {
+            fontSizeValue.textContent = `${settings.fontSize}x`;
+
+            const elements = [transcriptElement, translationElement];
+            elements.forEach(el => {
+                el.style.fontSize = `${settings.fontSize}em`;
+                el.style.fontFamily = settings.fontFamily;
+                el.style.color = settings.textColor;
+                el.style.backgroundColor = settings.bgColor;
+                el.style.textAlign = settings.textAlign;
+            });
+        }
+
+        fontSizeControl.addEventListener('input', saveSettings);
+        fontFamilyControl.addEventListener('change', saveSettings);
+        textColorControl.addEventListener('change', saveSettings);
+        bgColorControl.addEventListener('change', saveSettings);
+        textAlignControl.addEventListener('change', saveSettings);
+
+        window.addEventListener('load', loadSettings);
+
+
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
@@ -45,25 +163,37 @@
         const btn = document.getElementById("record-btn");
         const indicator = document.getElementById("recording-indicator");
 
+        transcriptElement.textContent = "(O texto transcrito aparecerá aqui)";
+        translationElement.textContent = "(A tradução aparecerá aqui)";
+        loadSettings(); 
+
         btn.addEventListener("click", async () => {
             if (!isRecording) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
 
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
 
-                mediaRecorder.onstop = sendAudio;
+                    mediaRecorder.onstop = sendAudio;
 
-                audioChunks = [];
-                mediaRecorder.start();
+                    audioChunks = [];
+                    mediaRecorder.start();
 
-                isRecording = true;
-                btn.textContent = "Stop Recording";
-                indicator.classList.add("active");
+                    isRecording = true;
+                    btn.textContent = "Parar Gravação";
+                    indicator.classList.add("active");
+                    transcriptElement.textContent = "Gravando... Fale agora.";
+                    translationElement.textContent = "Aguardando transcrição...";
+                } catch (error) {
+                    console.error("Erro ao acessar o microfone:", error);
+                    alert("Não foi possível acessar o microfone. Verifique as permissões.");
+                }
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                btn.textContent = "Start Recording";
+                btn.textContent = "Iniciando Processamento...";
+                btn.disabled = true; 
                 indicator.classList.remove("active");
             }
         });
@@ -73,16 +203,33 @@
             const formData = new FormData();
             formData.append("audio", blob, "audio.wav");
 
+            transcriptElement.textContent = "Enviando áudio para o servidor...";
+            translationElement.textContent = "Enviando áudio para o servidor...";
+
             fetch("/api/transcribe/", {
                 method: "POST",
                 body: formData
             })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("transcript").textContent = data.transcript || "(no transcript)";
-                document.getElementById("translation").textContent = data.translation || "(no translation)";
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`Erro HTTP: ${res.status}`);
+                }
+                return res.json();
             })
-            .catch(err => console.error("Error:", err));
+            .then(data => {
+                transcriptElement.textContent = data.transcript || "(Nenhuma transcrição recebida)";
+                translationElement.textContent = data.translation || "(Nenhuma tradução recebida)";
+                applySettings(JSON.parse(localStorage.getItem('accessibilitySettings') || JSON.stringify(defaultSettings)));
+            })
+            .catch(err => {
+                console.error("Erro:", err);
+                transcriptElement.textContent = `Erro no processamento: ${err.message}`;
+                translationElement.textContent = `Erro no processamento: ${err.message}`;
+            })
+            .finally(() => {
+                btn.textContent = "Iniciar Gravação";
+                btn.disabled = false; 
+            });
         }
     </script>
 </body>
